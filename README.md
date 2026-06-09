@@ -40,3 +40,13 @@ In the case of this application, textbooks will initially be queued for processi
 the user will then provide the information for things such as author(s), title, edition,
 etc. Then, the application will display the files using one or more formats, depending on
 what information is available.
+
+## Note
+
+I am working on this project with minimal assistance of AI. Besides the occasional aid
+investigating more elaborate errors, or asking to review and suggest alternate design
+decisions, AI use will be kept to a minimum.
+
+It is of my opinion that AI takes the _fun_ out of projects such as these. While they have
+their place, they certainly make it all too easy to give in to the temptation of passing
+off work.
