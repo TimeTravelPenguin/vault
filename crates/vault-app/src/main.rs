@@ -1,14 +1,30 @@
-use anyhow::{Context, Result};
 use clap::Parser;
-use sea_orm::{Database, DatabaseConnection};
+use sea_orm::{ActiveValue, Database, DatabaseConnection, EntityTrait, entity};
 
-use vault_app::cli;
+use thiserror::Error;
+use vault_app::{cli, tui::TuiError};
 use vault_migrations::MigratorTrait;
+
+#[derive(Debug, Error)]
+enum AppError {
+    #[error("TUI error: {0}")]
+    Tui(#[from] TuiError),
+    #[error("Database error: {0}")]
+    Database(#[from] sea_orm::DbErr),
+    #[error("ColorEyre error: {0}")]
+    ColorEyre(#[from] color_eyre::eyre::Report),
+    #[error("I/O error: {0}")]
+    Io(#[from] std::io::Error),
+
+    #[error("The specified database path is a directory: {0}")]
+    DbPathIsDirectory(String),
+}
+
+type Result<T> = std::result::Result<T, AppError>;
 
 #[tokio::main]
 async fn main() -> Result<()> {
     let cli = cli::Cli::parse();
-    println!("{:#?}", cli);
 
     match cli.command {
         cli::Commands::Tui(args) => {
@@ -22,20 +38,45 @@ async fn main() -> Result<()> {
                 migrate_db(args).await?;
             }
         },
+        cli::Commands::Test => {
+            test().await?;
+        }
     };
 
     Ok(())
 }
 
+async fn test() -> Result<()> {
+    color_eyre::install()?;
+
+    std::fs::remove_file("db.sqlite").ok();
+    let db = Database::connect("sqlite://db.sqlite?mode=rwc").await?;
+    db.get_schema_registry("vault_db::entity::*")
+        .sync(&db)
+        .await?;
+
+    let tag = vault_db::tags::ActiveModel {
+        id: ActiveValue::Set(uuid::Uuid::new_v4()),
+        name: ActiveValue::Set("Test Tag".to_string()),
+        ..Default::default()
+    };
+
+    let res = vault_db::tags::Entity::insert(tag).exec(&db).await?;
+    println!("{:?}", res);
+
+    Ok(())
+}
+
 async fn run_tui(args: cli::TuiArgs) -> Result<()> {
+    color_eyre::install()?;
+
     let db = Database::connect(format!(
         "sqlite://{}?mode=rwc",
         args.db_args.path.to_string_lossy()
     ))
-    .await
-    .context("Failed to connect to database")?;
+    .await?;
 
-    vault_app::app::run(db).context("Error running application")
+    vault_app::tui::run(db).map_err(AppError::Tui)
 }
 
 async fn create_db(args: cli::DbCreateArgs) -> Result<()> {
@@ -48,26 +89,21 @@ async fn create_db(args: cli::DbCreateArgs) -> Result<()> {
     let conn_str = format!("sqlite://{}{}", db_path.to_string_lossy(), replace);
 
     if db_path.is_dir() {
-        return Err(anyhow::anyhow!(
-            "The specified path is a directory: {:?}",
-            db_path
+        return Err(AppError::DbPathIsDirectory(
+            db_path.to_string_lossy().to_string(),
         ));
     }
 
     if args.replace && db_path.exists() {
         println!("Removing existing database file: {:?}", db_path);
-        std::fs::remove_file(&db_path)
-            .with_context(|| format!("Failed to remove existing database file: {:?}", db_path))?;
+        std::fs::remove_file(&db_path)?;
     }
 
-    let db: DatabaseConnection = Database::connect(&conn_str)
-        .await
-        .context("Failed to connect to database")?;
+    let db: DatabaseConnection = Database::connect(&conn_str).await?;
 
     db.get_schema_registry("vault_db::entity::*")
         .sync(&db)
-        .await
-        .context("Failed to synchronize database schema")?;
+        .await?;
 
     println!("Completed database setup");
     Ok(())
@@ -78,19 +114,14 @@ async fn migrate_db(args: cli::DbMigrateArgs) -> Result<()> {
     let conn_str = format!("sqlite://{}", db_path.to_string_lossy());
 
     if db_path.is_dir() {
-        return Err(anyhow::anyhow!(
-            "The specified path is a directory: {:?}",
-            db_path
+        return Err(AppError::DbPathIsDirectory(
+            db_path.to_string_lossy().to_string(),
         ));
     }
 
-    let db: DatabaseConnection = Database::connect(&conn_str)
-        .await
-        .context("Failed to connect to database")?;
+    let db: DatabaseConnection = Database::connect(&conn_str).await?;
 
-    vault_migrations::Migrator::up(&db, None)
-        .await
-        .context("Failed to run database migrations")?;
+    vault_migrations::Migrator::up(&db, None).await?;
 
     println!("Completed database migration");
     Ok(())

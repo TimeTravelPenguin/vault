@@ -14,13 +14,14 @@ path = "src/main.rs"
 anyhow = "1.0.102"
 blake3 = "1.8.5"
 clap = { version = "4.6.1", features = ["derive", "wrap_help"] }
+color-eyre = "0.6.5"
 derive_setters = "0.1.9"
 directories = "6.0.0"
 futures = "0.3.32"
 ignore = "0.4.26"
 notify = "8.2.0"
 ratatui = "0.30.1"
-sea-orm = { version = "2.0.0-rc.9", features = [
+sea-orm = { version = "~2.0.0-rc", features = [
   "sqlx-sqlite",
   "runtime-tokio-rustls",
   "macros",

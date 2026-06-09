@@ -16,12 +16,12 @@ use sea_orm::DatabaseConnection;
 use thiserror::Error;
 
 #[derive(Debug, Error)]
-pub enum AppError {
+pub enum TuiError {
     #[error("terminal error: {0}")]
     Terminal(#[from] io::Error),
 }
 
-pub fn run(db: DatabaseConnection) -> Result<(), AppError> {
+pub fn run(db: DatabaseConnection) -> Result<(), TuiError> {
     install_panic_hook();
 
     let mut guard = TerminalGuard::new()?;
@@ -117,7 +117,7 @@ impl App {
         self.exit = true;
     }
 
-    fn handle_events(&mut self) -> Result<(), AppError> {
+    fn handle_events(&mut self) -> Result<(), TuiError> {
         match event::read()? {
             // It's important to check that the event is a key press event as
             // crossterm also emits key release and repeat events on Windows.
