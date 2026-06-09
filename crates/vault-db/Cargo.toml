@@ -1,0 +1,21 @@
+[package]
+name = "vault-db"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+sea-orm = { version = "~2.0.0-rc", features = [
+  "sqlx-sqlite",
+  "runtime-tokio-rustls",
+  "macros",
+  "with-time",
+  "with-uuid",
+] }
+time = { version = "0.3.47", features = ["serde", "formatting"] }
+uuid = { version = "1.23.3", features = ["v4", "serde"] }
+
+[lints]
+workspace = true

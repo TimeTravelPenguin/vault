@@ -1,0 +1,43 @@
+[package]
+name = "vault-app"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[[bin]]
+name = "vault"
+path = "src/main.rs"
+
+[dependencies]
+anyhow = "1.0.102"
+blake3 = "1.8.5"
+clap = { version = "4.6.1", features = ["derive", "wrap_help"] }
+derive_setters = "0.1.9"
+directories = "6.0.0"
+futures = "0.3.32"
+ignore = "0.4.26"
+notify = "8.2.0"
+ratatui = "0.30.1"
+sea-orm = { version = "2.0.0-rc.9", features = [
+  "sqlx-sqlite",
+  "runtime-tokio-rustls",
+  "macros",
+  "with-time",
+  "with-uuid",
+  "schema-sync",
+  "entity-registry",
+] }
+serde = { version = "1.0.228", features = ["derive"] }
+serde_json = { version = "1.0.150", features = ["preserve_order"] }
+thiserror = "2.0.18"
+time = { version = "0.3.47", features = ["formatting", "parsing", "serde"] }
+tokio = { version = "1.52.3", features = ["full"] }
+tokio-util = "0.7.18"
+uuid = { version = "1.23.3", features = ["v4", "serde"] }
+vault-db = { path = "../vault-db" }
+vault-migrations = { path = "../vault-migrations" }
+
+[lints]
+workspace = true
