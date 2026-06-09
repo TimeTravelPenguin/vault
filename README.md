@@ -20,10 +20,13 @@ Another use case of mine is that I very much desire having my digital documents 
 following at least one naming format. For example, I may have the following document:
 
 ```
-- Stuart J. Russell, Peter Norvig - Artificial Intelligence_ A Modern Approach, Global Edition-Pearson (2021)
-- Ian Goodfellow and Yoshua Bengio and Aaron Courville - Deep Learning_ Adaptive Computation and Machine Learning-The MIT Press (2016)
+- Stuart J. Russell, Peter Norvig - Artificial Intelligence_ A Modern Approach, Global
+  Edition-Pearson (2021)
+- Ian Goodfellow and Yoshua Bengio and Aaron Courville - Deep Learning_ Adaptive
+  Computation and Machine Learning-The MIT Press (2016)
 - Business and Consumer Analytics - New Ideas
-- (Undergraduate Texts in Mathematics) Adkins, William A_Davidson, Mark G - Ordinary Differential Equations-Springer-Verlag New York Inc (2012)
+- (Undergraduate Texts in Mathematics) Adkins, William A_Davidson, Mark G - Ordinary
+  Differential Equations-Springer-Verlag New York Inc (2012)
 ```
 
 These names has a reasonable structure, including authors, publication year, edition, and
