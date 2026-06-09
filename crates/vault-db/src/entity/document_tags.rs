@@ -2,6 +2,7 @@ use sea_orm::entity::prelude::*;
 use uuid::Uuid;
 
 #[derive(Clone, Debug, PartialEq, Eq, DeriveEntityModel)]
+#[sea_orm::model]
 #[sea_orm(table_name = "document_tags")]
 pub struct Model {
     #[sea_orm(primary_key, auto_increment = false)]

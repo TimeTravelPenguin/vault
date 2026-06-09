@@ -2,6 +2,7 @@ use sea_orm::entity::prelude::*;
 use uuid::Uuid;
 
 #[derive(Clone, Debug, PartialEq, Eq, DeriveEntityModel)]
+#[sea_orm::model]
 #[sea_orm(table_name = "document_relationships")]
 pub struct Model {
     #[sea_orm(primary_key, auto_increment = false)]
@@ -24,9 +25,6 @@ pub enum RelationshipKind {
 
     #[sea_orm(string_value = "supplements")]
     Supplements,
-
-    #[sea_orm(string_value = "solution_manual_for")]
-    SolutionManualFor,
 
     #[sea_orm(string_value = "newer_edition_of")]
     NewerEditionOf,
