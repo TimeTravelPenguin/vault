@@ -2,6 +2,7 @@ use thiserror::Error;
 
 pub mod cli;
 pub mod config;
+pub mod db;
 pub mod tui;
 
 #[derive(Debug, Error)]
@@ -17,6 +18,8 @@ pub enum AppError {
 
     #[error(transparent)]
     Config(#[from] config::ConfigError),
+    #[error(transparent)]
+    Store(#[from] db::StoreError),
 
     #[error("The specified database path is a directory: {0}")]
     DbPathIsDirectory(String),
