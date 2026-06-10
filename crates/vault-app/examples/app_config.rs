@@ -1,15 +1,12 @@
 use vault_app::{
     AppError,
-    config::{AppConfig, ConfigVersion, from_file_path, try_from_connection_string},
+    config::{AppConfig, from_file_path, try_from_connection_string},
 };
 
 fn main() -> Result<(), AppError> {
     color_eyre::install()?;
 
-    let config_fp = AppConfig {
-        version: ConfigVersion::new(3).expect("Unsupported config version"),
-        database_path: from_file_path("db.sqlite"),
-    };
+    let config_fp = AppConfig::new(from_file_path("db.sqlite"));
 
     let config_cs = AppConfig::new(
         try_from_connection_string("sqlite://db.sqlite?mode=rwc")
