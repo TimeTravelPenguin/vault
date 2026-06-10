@@ -1,7 +1,7 @@
 use clap::Parser;
 use sea_orm::{Database, DatabaseConnection};
 
-use vault_app::{AppError, cli};
+use vault_app::{AppError, cli, config, db::VaultStore};
 use vault_migrations::MigratorTrait;
 
 type Result<T> = std::result::Result<T, AppError>;
@@ -27,16 +27,15 @@ async fn main() -> Result<()> {
     Ok(())
 }
 
-async fn run_tui(args: cli::TuiArgs) -> Result<()> {
+async fn run_tui(_args: cli::TuiArgs) -> Result<()> {
     color_eyre::install()?;
 
-    let db = Database::connect(format!(
-        "sqlite://{}?mode=rwc",
-        args.db_args.path.to_string_lossy()
-    ))
-    .await?;
+    let config = config::load_config(Some(config::CONFIG_FILE_NAME))?;
+    let store = VaultStore::new(config.database.clone()).await?;
 
-    vault_app::tui::run(db).map_err(AppError::Tui)
+    vault_app::tui::run(config, store).await?;
+
+    Ok(())
 }
 
 async fn create_db(args: cli::DbCreateArgs) -> Result<()> {
@@ -59,11 +58,14 @@ async fn create_db(args: cli::DbCreateArgs) -> Result<()> {
         std::fs::remove_file(&db_path)?;
     }
 
-    let db: DatabaseConnection = Database::connect(&conn_str).await?;
+    let db: DatabaseConnection = Database::connect(&conn_str)
+        .await
+        .map_err(AppError::Migration)?;
 
     db.get_schema_registry("vault_db::entity::*")
         .sync(&db)
-        .await?;
+        .await
+        .map_err(AppError::Migration)?;
 
     println!("Completed database setup");
     Ok(())
@@ -79,9 +81,13 @@ async fn migrate_db(args: cli::DbMigrateArgs) -> Result<()> {
         ));
     }
 
-    let db: DatabaseConnection = Database::connect(&conn_str).await?;
+    let db: DatabaseConnection = Database::connect(&conn_str)
+        .await
+        .map_err(AppError::Migration)?;
 
-    vault_migrations::Migrator::up(&db, None).await?;
+    vault_migrations::Migrator::up(&db, None)
+        .await
+        .map_err(AppError::Migration)?;
 
     println!("Completed database migration");
     Ok(())

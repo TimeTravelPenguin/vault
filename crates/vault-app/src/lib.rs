@@ -9,8 +9,8 @@ pub mod tui;
 pub enum AppError {
     #[error("TUI error: {0}")]
     Tui(#[from] tui::TuiError),
-    #[error("Database error: {0}")]
-    Database(#[from] sea_orm::DbErr),
+    #[error("Database migration error: {0}")]
+    Migration(#[source] sea_orm::DbErr),
     #[error("ColorEyre error: {0}")]
     ColorEyre(#[from] color_eyre::eyre::Report),
     #[error("I/O error: {0}")]

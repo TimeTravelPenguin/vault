@@ -12,8 +12,12 @@ use ratatui::{
     },
     prelude::*,
 };
-use sea_orm::DatabaseConnection;
 use thiserror::Error;
+
+use crate::{
+    config::AppConfig,
+    db::VaultStore,
+};
 
 #[derive(Debug, Error)]
 pub enum TuiError {
@@ -21,13 +25,13 @@ pub enum TuiError {
     Terminal(#[from] io::Error),
 }
 
-pub fn run(db: DatabaseConnection) -> Result<(), TuiError> {
+pub async fn run(config: AppConfig, store: VaultStore) -> Result<(), TuiError> {
     install_panic_hook();
 
     let mut guard = TerminalGuard::new()?;
     let terminal = &mut guard.terminal;
 
-    let mut app = App::new(db);
+    let mut app = App::new(config, store);
     let mut state = AppState {};
 
     while !app.exit {
@@ -102,14 +106,24 @@ impl Drop for TerminalGuard {
 struct AppState {}
 
 #[derive(Debug)]
+enum AppMode {
+    NoUserConfiguration,
+}
+
+#[derive(Debug)]
 struct App {
-    db: DatabaseConnection,
+    config: AppConfig,
+    store: VaultStore,
     exit: bool,
 }
 
 impl App {
-    pub fn new(db: DatabaseConnection) -> Self {
-        Self { db, exit: false }
+    pub fn new(config: AppConfig, store: VaultStore) -> Self {
+        Self {
+            config,
+            store,
+            exit: false,
+        }
     }
 
     /// Signal the TUI to exit on the next iteration of the event loop.
