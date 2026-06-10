@@ -3,7 +3,6 @@ use std::path::PathBuf;
 use thiserror::Error;
 use url::Url;
 
-
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(try_from = "Url", into = "Url")]
 pub struct DatabaseUrl(Url);

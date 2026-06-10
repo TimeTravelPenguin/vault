@@ -4,7 +4,6 @@ use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
 mod config_version;
-mod db_location;
 
 pub use config_version::ConfigVersion;
 
