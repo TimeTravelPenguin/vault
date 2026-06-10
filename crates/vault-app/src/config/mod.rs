@@ -26,15 +26,15 @@ pub enum ConfigError {
     InvalidDatabaseLocation(String),
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AppConfig {
     pub version: ConfigVersion,
-    pub database_path: DatabaseLocation,
+    pub database: DatabaseLocation,
 }
 
 impl Default for AppConfig {
     fn default() -> Self {
-        let config_dir = confy::get_configuration_file_path(APP_NAME, Some(CONFIG_FILE_NAME))
+        let config_dir = get_config_path(Some(CONFIG_FILE_NAME))
             .ok()
             .and_then(|path| path.parent().map(|parent| parent.to_path_buf()))
             .unwrap_or_else(|| ".".into());
@@ -47,9 +47,13 @@ impl AppConfig {
     pub fn new(db_location: DatabaseLocation) -> Self {
         Self {
             version: ConfigVersion::CURRENT,
-            database_path: db_location,
+            database: db_location,
         }
     }
+}
+
+pub fn get_config_path<'a>(name: impl Into<Option<&'a str>>) -> Result<PathBuf, ConfigError> {
+    confy::get_configuration_file_path(APP_NAME, name.into()).map_err(ConfigError::ConfyError)
 }
 
 pub fn load_config<'a>(name: impl Into<Option<&'a str>>) -> Result<AppConfig, ConfigError> {
