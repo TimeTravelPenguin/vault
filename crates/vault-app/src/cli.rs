@@ -19,7 +19,6 @@ pub enum Commands {
     /// Database management commands.
     #[command(subcommand)]
     Db(DbSubcommand),
-    Test,
 }
 
 #[derive(Debug, Parser)]
