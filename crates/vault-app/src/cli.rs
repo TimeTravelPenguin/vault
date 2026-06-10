@@ -16,9 +16,6 @@ pub struct Cli {
 pub enum Commands {
     /// Run the TUI.
     Tui(TuiArgs),
-    /// Database management commands.
-    #[command(subcommand)]
-    Db(DbSubcommand),
 }
 
 #[derive(Debug, Parser)]

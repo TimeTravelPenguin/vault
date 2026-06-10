@@ -1,7 +1,7 @@
+use std::path::PathBuf;
+
 use sea_orm::{Database, DatabaseConnection};
 use thiserror::Error;
-
-use crate::config::DatabaseLocation;
 
 #[derive(Debug, Error)]
 pub enum StoreError {
@@ -15,15 +15,13 @@ pub struct VaultStore {
 }
 
 impl VaultStore {
-    pub async fn new(db_location: DatabaseLocation) -> Result<Self, StoreError> {
-        let db = match db_location {
-            DatabaseLocation::FilePath(path) => {
-                Database::connect(format!("sqlite://{}", path.to_string_lossy())).await?
-            }
-            DatabaseLocation::ConnectionString(url) => {
-                Database::connect(url.as_url().as_str()).await?
-            }
-        };
+    pub async fn new(database: PathBuf) -> Result<Self, StoreError> {
+        let db =
+            Database::connect(format!("sqlite://{}?mode=rwc", database.to_string_lossy())).await?;
+
+        db.get_schema_registry("vault_db::entity::*")
+            .sync(&db)
+            .await?;
 
         Ok(Self { db })
     }
